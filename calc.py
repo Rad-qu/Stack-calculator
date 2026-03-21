@@ -25,6 +25,9 @@ class Calc(Compf):
     def compile(self, str):
         Compf.compile(self, str)
         return self.r.top()
+    
+    def pubg(self):
+        return 'pubg'
 
     # Обработка цифры
     def process_value(self, c):
@@ -39,6 +42,7 @@ class Calc(Compf):
 
 if __name__ == "__main__":
     c = Calc()
+    c.pubg()
     while True:
         str = input("Арифметическое выражение: ")
         print(f"Результат его вычисления: {c.compile(str)}")
