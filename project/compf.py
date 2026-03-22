@@ -88,9 +88,81 @@ class Compf:
         else:
             return Compf.priority(a) >= Compf.priority(b)
 
-
+"""
 if __name__ == "__main__":
     c = Compf()
+    while True:
+        str = input("Арифметическая  формула: ")
+        print(f"Результат её компиляции: {c.compile(str)}")
+        print()"""
+
+class Compf_power(Compf):
+    """
+    
+    Стековый компилятор формул с поддержкой возведения в степень(обозначается ** или ^),
+    причем она является правоассоциативной, и имеющеет максимальный приоритет.
+    При компиляции теперь используется токенизация
+    
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    token_pattern = re.compile(r"\*\*|[a-z]|[()+\-*/^]")
+
+    def tokenize(self, expr):
+        return re.findall(self.token_pattern, expr)
+    
+    def compile(self, str):
+        self.data.clear()
+        
+        tokens = self.tokenize("(" + str + ")")
+        for token in tokens:
+            self.process_symbol(token)
+        
+        return " ".join(self.data)
+
+    def process_symbol(self, token):
+        if token == "(":
+            self.s.push(token)
+        elif token == ")":
+            self.process_suspended_operators(token)
+            self.s.pop()
+        elif token in "+-*/^" or token == '**':
+            self.process_suspended_operators(token)
+            self.s.push(token)
+        else:
+            self.check_symbol(token)
+            self.process_value(token)
+    
+    def process_suspended_operators(self, token):
+        return super().process_suspended_operators(token)
+    
+    @staticmethod
+    def priority(op):
+        if op in "+-": return 1
+        elif op in "*/": return 2
+        else: return 3
+
+    @staticmethod
+    def is_right_associative(op):
+        right_associative_operators = ("**", "^")
+        return op in right_associative_operators
+
+    @staticmethod
+    def is_precedes(a, b):
+        if a == "(":
+            return False
+        if b == ")":
+            return True
+        if Compf_power.priority(a) > Compf_power.priority(b):
+            return True
+        if Compf_power.priority(a) < Compf_power.priority(b):
+            return False
+        return not Compf_power.is_right_associative(b)
+    
+if __name__ == "__main__":
+    c = Compf_power()
     while True:
         str = input("Арифметическая  формула: ")
         print(f"Результат её компиляции: {c.compile(str)}")
