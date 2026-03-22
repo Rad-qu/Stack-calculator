@@ -10,16 +10,8 @@ class Compf:
     арифметические формулы (цепочки языка, задаваемого
     грамматикой G0) в программы для стекового калькулятора
     (цепочки языка, определяемого грамматикой Gs):
+    ...
 
-    G0:
-        F  ->  T  |  F+T  |  F-T
-        T  ->  M  |  T*M  |  T/M
-        M  -> (F) |   V
-        V  ->  a  |   b   |   c   |  ...  |    z
-
-    Gs:
-        e  ->  e e + | e e - | e e * | e e / |
-                     | a | b | ... | z
     В качестве операндов в формулах допустимы только
     однобуквенные имена переменных [a-z]
     """
@@ -50,6 +42,8 @@ class Compf:
         elif c in "+-*/":
             self.process_suspended_operators(c)
             self.s.push(c)
+        elif c == '!':
+            self.process_oper(c)   # максимальный приоритет -> сразу в вывод
         else:
             self.check_symbol(c)
             self.process_value(c)
@@ -87,14 +81,6 @@ class Compf:
             return True
         else:
             return Compf.priority(a) >= Compf.priority(b)
-
-"""
-if __name__ == "__main__":
-    c = Compf()
-    while True:
-        str = input("Арифметическая  формула: ")
-        print(f"Результат её компиляции: {c.compile(str)}")
-        print()"""
 
 class Compf_power(Compf):
     """
@@ -159,6 +145,7 @@ class Compf_power(Compf):
         if Compf_power.priority(a) < Compf_power.priority(b):
             return False
         return not Compf_power.is_right_associative(b)
+      
 class Compf_power_low_priority(Compf_power):
 
     @staticmethod
@@ -166,8 +153,44 @@ class Compf_power_low_priority(Compf_power):
         if op in "+-": return 1
         elif op in "*/" or op == "**": return 2
 
-    
+class OctCompf(Compf):
+
+    SYMBOLS = re.compile(r'0[oO][0-7]+|[()+\-*/!]')
+
+    def compile(self, expr):
+        self.data.clear()
+        tokens = self.SYMBOLS.findall("(" + expr + ")")
+        for token in tokens:
+            if token.startswith('0') and token[1].lower() == 'o':
+                self.process_value(token)
+            else:
+                self.process_symbol(token)
+        return " ".join(self.data)
+
+    def process_value(self, c):
+        try:
+            value = int(c, 8)
+        except ValueError:
+            raise Exception(f"Некорректное восьмеричное число: {c}")
+        if value < 0 or value > 3999:
+            raise Exception(f"Число {c} выходит за допустимый диапазон [0, 3999]")
+        self.data.append(str(value))
+
+    @staticmethod
+    def priority(c):
+        if c == '/':
+            return 0
+        elif c == '*':
+            return 2
+        else:
+            return 1
+
+
 if __name__ == "__main__":
+    c = OctCompf()
+    expr = "0o10 + 0o2 / 0o5"
+    print(f"Выражение: {expr}")
+    print(f"Постфиксная форма: {c.compile(expr)}")
     c = Compf_power()
     while True:
         str = input("Арифметическая  формула: ")
