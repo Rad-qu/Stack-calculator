@@ -16,7 +16,7 @@ class Calc(Compf):
     SYMBOLS = re.compile("[0-9]")
 
     def __init__(self):
-             super().__init__()
+        super().__init__()
         self.r = Stack()
 
     def compile(self, str):
