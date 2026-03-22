@@ -38,7 +38,8 @@ class Calc(Compf):
 
 class Calc_power(Compf_power):
 
-    TOKEN_PATTERN = re.compile(r"\*\*|[()+\-*\/^]|[0]|[1-9][0-9]*")
+    SYMBOLS = re.compile(r'0|[1-9][0-9]*')
+    TOKEN_PATTERN = re.compile(r"\*\*|[()+\-*/^]|0|[1-9][0-9]*")
 
     def __init__(self):
         # Инициализация (конструктор) класса Compf

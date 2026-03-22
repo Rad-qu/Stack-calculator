@@ -159,6 +159,13 @@ class Compf_power(Compf):
         if Compf_power.priority(a) < Compf_power.priority(b):
             return False
         return not Compf_power.is_right_associative(b)
+class Compf_power_low_priority(Compf_power):
+
+    @staticmethod
+    def priority(op):
+        if op in "+-": return 1
+        elif op in "*/" or op == "**": return 2
+
     
 if __name__ == "__main__":
     c = Compf_power()
@@ -166,3 +173,4 @@ if __name__ == "__main__":
         str = input("Арифметическая  формула: ")
         print(f"Результат её компиляции: {c.compile(str)}")
         print()
+
