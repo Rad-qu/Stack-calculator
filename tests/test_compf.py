@@ -1,4 +1,4 @@
-from compf import Compf
+from project.compf import Compf
 
 
 class TestCompf:
