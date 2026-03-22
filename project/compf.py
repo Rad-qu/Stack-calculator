@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import re
-from stack import Stack
+from project.stack import Stack
 
 
 class Compf:
@@ -89,9 +89,47 @@ class Compf:
             return Compf.priority(a) >= Compf.priority(b)
 
 
+class OctCompf(Compf):
+    SYMBOLS = re.compile(r'0[oO][0-7]+|[()+\-*/]')
+
+    def compile(self, expr):
+        self.data.clear()
+        tokens = self.SYMBOLS.findall("(" + expr + ")")
+        for token in tokens:
+            if token.startswith('0') and token[1].lower() == 'o':
+                self.process_value(token)
+            else:
+                self.process_symbol(token)
+        return " ".join(self.data)
+
+    def process_value(self, c):
+        try:
+            value = int(c, 8)
+        except ValueError:
+            raise Exception(f"Некорректное восьмеричное число: {c}")
+        if value < 0 or value > 3999:
+            raise Exception(f"Число {c} выходит за допустимый диапазон [0, 3999]")
+        self.data.append(str(value))
+
+    @staticmethod
+    def priority(c):
+        if c == '/':
+            return 0
+        elif c == '*':
+            return 2
+        else:
+            return 1
+
+
 if __name__ == "__main__":
-    c = Compf()
-    while True:
-        str = input("Арифметическая  формула: ")
-        print(f"Результат её компиляции: {c.compile(str)}")
-        print()
+    # c = Compf()
+    # while True:
+    #     inp = input("Арифметическая  формула: ")
+    #     print(f"Результат её компиляции: {c.compile(inp)}")
+    #     print()
+
+        #Тест для восьмеричной системы
+    c = OctCompf()
+    expr = "0o10 + 0o2 / 0o5"
+    print(f"Выражение: {expr}")
+    print(f"Постфиксная форма: {c.compile(expr)}")

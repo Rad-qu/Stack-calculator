@@ -1,5 +1,5 @@
 from pytest import approx, raises
-from calc import Calc
+from project.calc import Calc
 
 
 class TestCalc:

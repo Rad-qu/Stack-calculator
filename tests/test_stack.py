@@ -1,5 +1,5 @@
 from pytest import raises
-from stack import Stack
+from project.stack import Stack
 
 
 class TestStack:
