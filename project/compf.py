@@ -94,7 +94,7 @@ class Compf_power(Compf):
     def __init__(self):
         super().__init__()
 
-    TOKEN_PATTERN = re.compile(r"\*\*|[a-z]|[()+\-*/^]")
+    TOKEN_PATTERN = re.compile(r"\*\*|[a-z]|[()+\-*/^!]")
 
     def tokenize(self, expr):
         return re.findall(self.TOKEN_PATTERN, expr)
@@ -116,6 +116,8 @@ class Compf_power(Compf):
         elif token in "+-*/^" or token == '**':
             self.process_suspended_operators(token)
             self.s.push(token)
+        elif token == '!':
+            self.process_oper(token)   # максимальный приоритет -> сразу в вывод
         else:
             self.check_symbol(token)
             self.process_value(token)

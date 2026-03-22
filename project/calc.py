@@ -47,7 +47,7 @@ class Calc(Compf):
 class Calc_power(Compf_power):
 
     SYMBOLS = re.compile(r'0|[1-9][0-9]*')
-    TOKEN_PATTERN = re.compile(r"\*\*|[()+\-*/^]|0|[1-9][0-9]*")
+    TOKEN_PATTERN = re.compile(r"\*\*|[()+\-*/^!]|0|[1-9][0-9]*")
 
     def __init__(self):
         # Инициализация (конструктор) класса Compf
@@ -69,9 +69,22 @@ class Calc_power(Compf_power):
 
     # Обработка символа операции
     def process_oper(self, c):
-        second, first = self.r.pop(), self.r.pop()
-        self.r.push({"+": add, "-": sub, "*": mul,
-                     "/": truediv, "**" : pow, "^": pow}[c](first, second))
+        if c == '!':
+            val = self.r.pop()
+            self.r.push(self.factorial(val))
+        else:
+            second, first = self.r.pop(), self.r.pop()
+            self.r.push({"+": add, "-": sub, "*": mul,
+                         "/": truediv, "**" : pow, "^": pow}[c](first, second))
+
+    @staticmethod
+    def factorial(n):
+        if not isinstance(n, int) or n < 0:
+            raise Exception("Факториал определён только для неотрицательных целых чисел")
+        result = 1
+        for i in range(2, n + 1):
+            result *= i
+        return result
 
 
 
