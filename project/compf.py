@@ -108,14 +108,13 @@ class Compf_power(Compf):
     def __init__(self):
         super().__init__()
 
-    token_pattern = re.compile(r"\*\*|[a-z]|[()+\-*/^]")
+    TOKEN_PATTERN = re.compile(r"\*\*|[a-z]|[()+\-*/^]")
 
     def tokenize(self, expr):
-        return re.findall(self.token_pattern, expr)
+        return re.findall(self.TOKEN_PATTERN, expr)
     
     def compile(self, str):
         self.data.clear()
-        
         tokens = self.tokenize("(" + str + ")")
         for token in tokens:
             self.process_symbol(token)

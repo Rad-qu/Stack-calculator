@@ -38,7 +38,7 @@ class Calc(Compf):
 
 class Calc_power(Compf_power):
 
-    token_pattern = re.compile(r"\*\*|[()+\-*/^]|[0]|[1-9][0-9]{0,3}")
+    TOKEN_PATTERN = re.compile(r"\*\*|[()+\-*/^]|[0]|[1-9][0-9]+")
 
     def __init__(self):
         # Инициализация (конструктор) класса Compf
@@ -47,31 +47,25 @@ class Calc_power(Compf_power):
         self.r = Stack()
         
     def tokenize(self, expr):
-        return super().tokenize(expr)
+        return re.findall(self.TOKEN_PATTERN, expr)
     
     # Интерпретация арифметического выражения
     def compile(self, str):
-        Compf.compile(self, str)
+        super().compile(str)
         return self.r.top()
 
     # Обработка цифры
     def process_value(self, c):
         self.r.push(int(c))
 
-    #возведение в степень
-    @staticmethod
-    def power(base, exponent):
-        return base**exponent
-
     # Обработка символа операции
     def process_oper(self, c):
         second, first = self.r.pop(), self.r.pop()
         self.r.push({"+": add, "-": sub, "*": mul,
-                     "/": truediv}[c](first, second))
+                     "/": truediv, "**" : pow, "^": pow}[c](first, second))
         
-
 if __name__ == "__main__":
-    c = Calc()
+    c = Calc_power()
     while True:
         str = input("Арифметическое выражение: ")
         print(f"Результат его вычисления: {c.compile(str)}")
