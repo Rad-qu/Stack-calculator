@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import re
-from project.stack import Stack
+from stack import Stack
 
 
 class Compf:
