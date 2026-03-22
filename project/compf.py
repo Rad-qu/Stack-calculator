@@ -19,18 +19,20 @@ class Compf:
     SYMBOLS = re.compile("[a-z]")
 
     def __init__(self):
+        # Создание стека отложенных операций
         self.s = Stack()
+        # Создание списка с результатом компиляции
         self.data = []
 
     def compile(self, str):
         self.data.clear()
-        # Удаляем все пробельные символы, чтобы избежать ошибок
-        str = ''.join(str.split())
-        # Последовательный вызов для всех символов взятой в скобки формулы
+        # Последовательный вызов для всех символов
+        # взятой в скобки формулы метода process_symbol
         for c in "(" + str + ")":
             self.process_symbol(c)
         return " ".join(self.data)
 
+    # Обработка символа
     def process_symbol(self, c):
         if c == "(":
             self.s.push(c)
@@ -46,25 +48,31 @@ class Compf:
             self.check_symbol(c)
             self.process_value(c)
 
+    # Обработка отложенных операций
     def process_suspended_operators(self, c):
         while self.is_precedes(self.s.top(), c):
             self.process_oper(self.s.pop())
 
+    # Обработка имени переменной
     def process_value(self, c):
         self.data.append(c)
 
+    # Обработка символа операции
     def process_oper(self, c):
         self.data.append(c)
 
+    # Проверка допустимости символа
     @classmethod
     def check_symbol(self, c):
         if not self.SYMBOLS.match(c):
             raise Exception(f"Недопустимый символ '{c}'")
 
+    # Определение приоритета операции
     @staticmethod
     def priority(c):
         return 1 if (c == "+" or c == "-") else 2
 
+    # Определение отношения предшествования
     @staticmethod
     def is_precedes(a, b):
         if a == "(":
@@ -74,6 +82,76 @@ class Compf:
         else:
             return Compf.priority(a) >= Compf.priority(b)
 
+class Compf_power(Compf):
+    """
+    
+    Стековый компилятор формул с поддержкой возведения в степень(обозначается ** или ^),
+    причем она является правоассоциативной, и имеющеет максимальный приоритет.
+    При компиляции теперь используется токенизация
+    
+    """
+
+    def __init__(self):
+        super().__init__()
+
+    TOKEN_PATTERN = re.compile(r"\*\*|[a-z]|[()+\-*/^]")
+
+    def tokenize(self, expr):
+        return re.findall(self.TOKEN_PATTERN, expr)
+    
+    def compile(self, str):
+        self.data.clear()
+        tokens = self.tokenize("(" + str + ")")
+        for token in tokens:
+            self.process_symbol(token)
+        
+        return " ".join(self.data)
+
+    def process_symbol(self, token):
+        if token == "(":
+            self.s.push(token)
+        elif token == ")":
+            self.process_suspended_operators(token)
+            self.s.pop()
+        elif token in "+-*/^" or token == '**':
+            self.process_suspended_operators(token)
+            self.s.push(token)
+        else:
+            self.check_symbol(token)
+            self.process_value(token)
+    
+    def process_suspended_operators(self, token):
+        return super().process_suspended_operators(token)
+    
+    @staticmethod
+    def priority(op):
+        if op in "+-": return 1
+        elif op in "*/": return 2
+        else: return 3
+
+    @staticmethod
+    def is_right_associative(op):
+        right_associative_operators = ("**", "^")
+        return op in right_associative_operators
+
+    @staticmethod
+    def is_precedes(a, b):
+        if a == "(":
+            return False
+        if b == ")":
+            return True
+        if Compf_power.priority(a) > Compf_power.priority(b):
+            return True
+        if Compf_power.priority(a) < Compf_power.priority(b):
+            return False
+        return not Compf_power.is_right_associative(b)
+      
+class Compf_power_low_priority(Compf_power):
+
+    @staticmethod
+    def priority(op):
+        if op in "+-": return 1
+        elif op in "*/" or op == "**": return 2
 
 class OctCompf(Compf):
 
@@ -113,3 +191,9 @@ if __name__ == "__main__":
     expr = "0o10 + 0o2 / 0o5"
     print(f"Выражение: {expr}")
     print(f"Постфиксная форма: {c.compile(expr)}")
+    c = Compf_power()
+    while True:
+        str = input("Арифметическая  формула: ")
+        print(f"Результат её компиляции: {c.compile(str)}")
+        print()
+
