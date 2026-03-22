@@ -76,9 +76,6 @@ class Compf:
 
 
 class OctCompf(Compf):
-
-    SYMBOLS = re.compile(r'0[oO][0-7]+|[()+\-*/!]')
-
     def compile(self, expr):
         self.data.clear()
         tokens = self.SYMBOLS.findall("(" + expr + ")")

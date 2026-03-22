@@ -46,6 +46,7 @@ class Calc(Compf):
 
 
 class OctCalc(OctCompf):
+    SYMBOLS = re.compile(r'0[oO][0-7]+|[()+\-*/!]')
     def __init__(self):
         super().__init__()
         self.r = Stack()
