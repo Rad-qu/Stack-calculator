@@ -15,3 +15,6 @@ class Stack:
 
     def top(self):
         return self.array[len(self.array) - 1]
+    
+    def is_empty(self):
+        return self.array == []
